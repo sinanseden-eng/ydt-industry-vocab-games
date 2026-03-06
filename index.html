@@ -106,6 +106,10 @@
 
         .view { display: none; }
         .view.active { display: block; }
+
+        /* Millionaire specific */
+        .ladder-step.active { background-color: var(--econ-gold); color: black; font-weight: bold; border-radius: 4px; }
+        .ladder-step.passed { color: var(--agri-green); }
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center justify-center">
@@ -123,7 +127,7 @@
                 <p class="text-xl text-slate-400">Master the vocabulary of production, trade, and the natural world.</p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Game 1 -->
                 <div class="glass green-border rounded-xl p-8 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('speedrun')">
                     <div>
@@ -149,7 +153,7 @@
                     <div>
                         <div class="text-5xl mb-4 drop-shadow-md">🔗</div>
                         <h2 class="text-2xl text-emerald-400 mb-2 font-display">Market Match</h2>
-                        <p class="text-slate-300 text-sm mb-6">Memory match! Pair the related vocabulary words (like Synonyms or Antonyms).</p>
+                        <p class="text-slate-300 text-sm mb-6">Memory match! Pair the related vocabulary words (Synonyms or Antonyms).</p>
                     </div>
                     <button class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-3 rounded text-lg transition-all tracking-wider font-display">Start Shift</button>
                 </div>
@@ -169,7 +173,7 @@
                     <div>
                         <div class="text-5xl mb-4 drop-shadow-md">🚢</div>
                         <h2 class="text-2xl text-emerald-400 mb-2 font-display">Supply Chain Clash</h2>
-                        <p class="text-slate-300 text-sm mb-6">Team vs Team. Create a meaningful sentence connecting random target vocabulary words.</p>
+                        <p class="text-slate-300 text-sm mb-6">Team vs Team. Create a meaningful sentence connecting 2 target vocabulary words.</p>
                     </div>
                     <button class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-3 rounded text-lg transition-all tracking-wider font-display">Start Shift</button>
                 </div>
@@ -182,6 +186,16 @@
                         <p class="text-slate-300 text-sm mb-6">The ultimate quiz show review covering Farming, Industry, Business, and Economics.</p>
                     </div>
                     <button class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-3 rounded text-lg transition-all tracking-wider font-display">Start Shift</button>
+                </div>
+
+                <!-- Game 7 (NEW) -->
+                <div class="glass green-border rounded-xl p-8 text-center flex flex-col justify-between game-btn cursor-pointer lg:col-span-2" onclick="startGame('millionaire')">
+                    <div>
+                        <div class="text-5xl mb-4 drop-shadow-md">💰</div>
+                        <h2 class="text-2xl text-emerald-400 mb-2 font-display">The Market Mogul</h2>
+                        <p class="text-slate-300 text-sm mb-6">Climb the ladder to $1,000,000 by answering multiple-choice vocabulary questions!</p>
+                    </div>
+                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-3 rounded text-lg transition-all tracking-wider font-display">Play for a Million</button>
                 </div>
             </div>
         </div>
@@ -246,10 +260,26 @@
                     <button onclick="showView('dashboard')" class="text-emerald-500 hover:text-emerald-300 font-bold tracking-widest text-sm uppercase">← Back</button>
                     <div class="text-2xl font-display text-emerald-400" id="res-score">Matches: 0 / 8</div>
                 </div>
-                <div class="text-center mb-8">
-                    <p class="text-slate-300 text-lg">Connect the supply chain! Match the related words (Synonyms, Antonyms, or Associations).</p>
+
+                <!-- NEW: Adjustable Timer for Market Match -->
+                <div class="bg-black/30 rounded-xl p-4 mb-8 text-center max-w-md mx-auto shadow-inner border border-emerald-500/20">
+                    <div class="text-4xl font-display text-white mb-2 tracking-widest" id="res-timer-display">01:00</div>
+                    <div class="flex justify-center items-center gap-3 mb-4">
+                        <button onclick="adjustResTimer(-10)" class="text-emerald-500 font-bold hover:text-emerald-300 transition">-10s</button>
+                        <span class="text-slate-400 text-xs uppercase tracking-widest font-bold">Adjust Time</span>
+                        <button onclick="adjustResTimer(10)" class="text-emerald-500 font-bold hover:text-emerald-300 transition">+10s</button>
+                    </div>
+                    <div class="flex justify-center gap-2">
+                        <button onclick="startResTimer()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded text-white text-sm font-bold transition">Start</button>
+                        <button onclick="pauseResTimer()" class="bg-amber-600 hover:bg-amber-500 px-6 py-2 rounded text-white text-sm font-bold transition">Pause</button>
+                        <button onclick="resetResTimer()" class="bg-slate-600 hover:bg-slate-500 px-6 py-2 rounded text-white text-sm font-bold transition">Reset</button>
+                    </div>
                 </div>
-                <div id="res-grid" class="grid grid-cols-4 md:grid-cols-4 gap-3 md:gap-4 animate-pop-in max-w-4xl mx-auto">
+
+                <div class="text-center mb-6">
+                    <p class="text-slate-300 text-sm italic">Press Start on the timer to begin matching the related words!</p>
+                </div>
+                <div id="res-grid" class="grid grid-cols-4 md:grid-cols-4 gap-3 md:gap-4 max-w-4xl mx-auto opacity-50 pointer-events-none transition-opacity duration-300">
                     <!-- Cards injected by JS -->
                 </div>
             </div>
@@ -328,8 +358,18 @@
                 </div>
 
                 <div class="text-center">
-                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs mb-6">Create a logical sentence using these words:</p>
-                    <div id="sn-words-container" class="flex flex-col md:flex-row flex-wrap justify-center gap-6 mb-10 items-center min-h-[4rem]"></div>
+                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs mb-6">Create a logical sentence connecting these 2 words:</p>
+                    <div id="sn-words-container" class="flex flex-col md:flex-row flex-wrap justify-center gap-6 mb-8 items-center min-h-[4rem]"></div>
+                    
+                    <!-- NEW: Reveal Button & Meaningful Example -->
+                    <div class="mb-8 max-w-2xl mx-auto">
+                        <button onclick="toggleSentenceExample()" class="text-sm font-bold text-emerald-400 hover:text-white underline transition mb-3">Teacher: Reveal Example Sentence</button>
+                        <div id="sn-example-box" class="hidden bg-emerald-900/40 border border-emerald-500/50 p-5 rounded-xl shadow-inner">
+                            <p class="text-emerald-300 font-bold text-xs uppercase tracking-widest mb-2">Meaningful Context Example:</p>
+                            <p id="sn-example-text" class="text-white text-lg font-serif italic"></p>
+                        </div>
+                    </div>
+
                     <button onclick="nextSentenceWords()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-display font-bold text-xl py-4 px-10 rounded shadow-lg transition-all border border-emerald-400/50">Draw Target Words 🎲</button>
                 </div>
             </div>
@@ -353,9 +393,25 @@
                     </div>
                 </div>
 
+                <!-- Jeopardy Modal with Timer and Go Back -->
                 <div id="jeop-modal" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                    <div class="bg-slate-900 p-10 rounded-2xl border-2 border-emerald-600 max-w-3xl w-full text-center relative shadow-2xl">
-                        <h3 id="jeop-cat-val" class="text-emerald-400 font-display text-2xl mb-8 uppercase tracking-widest"></h3>
+                    <div class="bg-slate-900 p-8 md:p-10 rounded-2xl border-2 border-emerald-600 max-w-4xl w-full text-center relative shadow-2xl">
+                        
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-700 pb-4 gap-4">
+                            <h3 id="jeop-cat-val" class="text-emerald-400 font-display text-2xl uppercase tracking-widest"></h3>
+                            
+                            <!-- NEW: Adjustable Question Timer -->
+                            <div class="flex items-center gap-3 bg-black/50 p-2 rounded-lg border border-slate-600">
+                                <button onclick="adjustJeopTimer(-5)" class="text-slate-400 hover:text-white font-bold px-2 transition">-5s</button>
+                                <span id="jeop-timer-display" class="text-3xl font-mono text-red-400 font-bold w-16 text-center">30</span>
+                                <button onclick="adjustJeopTimer(5)" class="text-slate-400 hover:text-white font-bold px-2 transition">+5s</button>
+                                <div class="border-l border-slate-600 pl-3 flex gap-2">
+                                    <button onclick="startJeopTimer()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold transition">Start</button>
+                                    <button onclick="pauseJeopTimer()" class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1 rounded text-sm font-bold transition">Pause</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <p id="jeop-q-text" class="text-white text-3xl md:text-4xl font-light mb-10 leading-relaxed"></p>
                         
                         <div id="jeop-answer-area" class="hidden">
@@ -370,7 +426,53 @@
                             </div>
                         </div>
 
-                        <button id="jeop-reveal-btn" onclick="document.getElementById('jeop-answer-area').classList.remove('hidden'); this.classList.add('hidden');" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-10 rounded transition text-xl shadow-lg w-full max-w-sm mx-auto font-display tracking-widest">Reveal Answer</button>
+                        <div class="flex justify-center gap-4 mt-8">
+                            <button id="jeop-reveal-btn" onclick="document.getElementById('jeop-answer-area').classList.remove('hidden'); this.classList.add('hidden'); clearInterval(jeopTimerInterval);" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-10 rounded transition text-lg shadow-lg font-display tracking-widest flex-1 max-w-xs">Reveal Answer</button>
+                            <!-- NEW: Go Back Button for misclicks -->
+                            <button onclick="cancelJeopardy()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded transition text-sm uppercase tracking-widest border border-slate-500">Go Back / Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 7: THE MARKET MOGUL (Millionaire Game) ================= -->
+        <div id="view-millionaire" class="view">
+            <div class="glass green-border rounded-3xl p-6 md:p-10 relative max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="showView('dashboard')" class="text-emerald-500 hover:text-emerald-300 font-bold tracking-widest text-sm uppercase">← Back</button>
+                    <div class="text-2xl font-display text-emerald-400">The Market Mogul</div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- Q&A Area -->
+                    <div class="lg:col-span-2 flex flex-col justify-end">
+                        <div class="bg-slate-900 border-2 border-emerald-500/50 rounded-2xl p-8 mb-6 shadow-xl relative min-h-[200px] flex items-center justify-center text-center">
+                            <h3 id="mil-q-text" class="text-2xl md:text-3xl text-white font-serif leading-relaxed"></h3>
+                        </div>
+
+                        <!-- Lifelines -->
+                        <div class="flex justify-center gap-4 mb-6">
+                            <button id="btn-5050" onclick="use5050()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-full border-2 border-amber-300 shadow-lg transition-all text-sm tracking-widest uppercase">50 / 50</button>
+                        </div>
+
+                        <div id="mil-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Answer buttons injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Prize Ladder -->
+                    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-inner text-right font-display text-lg tracking-wider flex flex-col justify-end gap-2" id="mil-ladder">
+                        <div class="ladder-step" data-level="9">$1,000,000</div>
+                        <div class="ladder-step" data-level="8">$500,000</div>
+                        <div class="ladder-step" data-level="7">$250,000</div>
+                        <div class="ladder-step" data-level="6">$100,000</div>
+                        <div class="ladder-step" data-level="5">$50,000</div>
+                        <div class="ladder-step" data-level="4">$10,000</div>
+                        <div class="ladder-step" data-level="3">$5,000</div>
+                        <div class="ladder-step" data-level="2">$1,000</div>
+                        <div class="ladder-step" data-level="1">$500</div>
+                        <div class="ladder-step" data-level="0">$100</div>
                     </div>
                 </div>
             </div>
@@ -380,11 +482,11 @@
         <div id="view-results" class="view text-center">
             <div class="glass green-border rounded-3xl p-10 max-w-lg mx-auto animate-pop-in">
                 <div class="text-7xl mb-6">🏆</div>
-                <h2 class="text-4xl font-display text-emerald-400 mb-2">Shift Complete!</h2>
+                <h2 class="text-4xl font-display text-emerald-400 mb-2">Game Over!</h2>
                 <p id="results-message" class="text-lg text-slate-300 mb-8"></p>
                 
                 <div class="bg-black/40 rounded-xl p-6 mb-8 border border-emerald-500/20">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Final Score</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Final Result</span>
                     <span id="results-score" class="text-5xl font-display text-white">0</span>
                 </div>
                 <button onclick="showView('dashboard')" class="w-full bg-slate-800 hover:bg-slate-700 border border-emerald-500/50 text-emerald-400 font-bold py-4 rounded text-lg transition-all tracking-widest uppercase font-display">Back to Arcade</button>
@@ -396,7 +498,7 @@
     <!-- SCRIPTS -->
     <script>
         // ==========================================
-        // DATA BANKS (Based entirely on user's vocabulary list)
+        // DATA BANKS
         // ==========================================
         
         // 1. Vocabulary for Speed Run & Hangman
@@ -421,7 +523,7 @@
             { word: "manufactures", def: "Makes something on a large scale using machinery." }
         ];
 
-        // 2. Memory Match Pairs (Antonyms & Associations)
+        // 2. Memory Match Pairs
         const memoryPairsData = [
             { id: 1, text: "Fertile" }, { id: 1, text: "Barren" },
             { id: 2, text: "Importer" }, { id: 2, text: "Exporter" },
@@ -433,35 +535,51 @@
             { id: 8, text: "Livestock" }, { id: 8, text: "Cattle" }
         ];
 
-        // 3. Defuse the Market (Context Sentences)
+        // 3. Defuse the Market (Massively Expanded)
         const bombQuestions = [
             { q: "Because there was no rain for months, the land remained completely _____.", a: "barren", w1: "lush", w2: "fertile" },
-            { q: "The factory introduced advanced _____ to speed up the assembly line.", a: "automation", w1: "irrigation", w2: "devaluation" },
-            { q: "After losing all its money in the crash, the company went _____.", a: "bankrupt", w1: "flourishing", w2: "invaluable" },
-            { q: "Farmers rely heavily on _____ systems to bring water to their dry fields.", a: "irrigation", w1: "automation", w2: "transportation" },
-            { q: "Wheat, corn, and oil are important global _____ traded every day.", a: "commodities", w1: "orchards", w2: "refineries" },
-            { q: "The currency suffered a massive _____ making imports very expensive.", a: "devaluation", w1: "harvest", w2: "plantation" },
-            { q: "With the new machines doing the work, many manual jobs became _____.", a: "redundant", w1: "invaluable", w2: "productive" },
-            { q: "They extract huge blocks of limestone from the local _____.", a: "quarry", w1: "orchard", w2: "conservatory" },
-            { q: "Instead of buying goods from abroad, the nation became a massive _____.", a: "exporter", w1: "importer", w2: "consumer" },
-            { q: "The _____ was full of healthy apple and pear trees.", a: "orchard", w1: "shipyard", w2: "refinery" },
-            { q: "Due to the economic _____, house prices fell dramatically.", a: "slump", w1: "trend", w2: "yield" },
-            { q: "They keep large herds of _____ on the farm for milk and meat.", a: "cattle", w1: "poultry", w2: "greenery" },
-            { q: "The crude oil is sent to the _____ to be purified into gasoline.", a: "refinery", w1: "mill", w2: "quarry" },
-            { q: "A successful business is a _____ one.", a: "flourishing", w1: "collapsing", w2: "receding" },
-            { q: "She _____ the data carefully to get the result she wanted.", a: "manipulated", w1: "slaughtered", w2: "cultivated" }
+            { q: "The factory introduced advanced _____ to speed up production.", a: "automation", w1: "irrigation", w2: "devaluation" },
+            { q: "After losing all its money, the company went _____.", a: "bankrupt", w1: "flourishing", w2: "invaluable" },
+            { q: "The farmer has a massive _____ of sheep on the hills.", a: "flock", w1: "crop", w2: "poultry" },
+            { q: "They keep large herds of _____ for milk production.", a: "cattle", w1: "grain", w2: "poultry" },
+            { q: "To make fuel, crude oil is sent to the local _____.", a: "refinery", w1: "shipyard", w2: "mill" },
+            { q: "The workers stood by the _____ line checking the products.", a: "assembly", w1: "production", w2: "plantation" },
+            { q: "A successful, growing business is _____.", a: "flourishing", w1: "collapsing", w2: "receding" },
+            { q: "The new machine makes manual jobs completely _____.", a: "redundant", w1: "productive", w2: "invaluable" },
+            { q: "We extract heavy stone blocks from the local _____.", a: "quarry", w1: "orchard", w2: "conservatory" },
+            { q: "The sudden _____ of the currency caused import prices to rise.", a: "devaluation", w1: "transportation", w2: "fertilization" },
+            { q: "The country sells its goods abroad; it is a major _____.", a: "exporter", w1: "importer", w2: "consumer" },
+            { q: "The trees in the _____ are full of ripe apples.", a: "orchard", w1: "plantation", w2: "greenery" },
+            { q: "To bring water to the dry fields, they use _____.", a: "irrigation", w1: "automation", w2: "transportation" },
+            { q: "Wheat and oil are important global _____.", a: "commodities", w1: "wages", w2: "contracts" },
+            { q: "The rich soil in the valley is highly _____.", a: "fertile", w1: "barren", w2: "broke" },
+            { q: "The tropical rainforest is dense and _____.", a: "lush", w1: "receding", w2: "redundant" },
+            { q: "The farm raises a large amount of _____ like chickens and ducks.", a: "poultry", w1: "cattle", w2: "livestock" },
+            { q: "The autumn harvest provided essential _____ for the winter.", a: "nourishment", w1: "devaluation", w2: "automation" },
+            { q: "Bad weather severely _____ the crop yield this year.", a: "undermines", w1: "extends", w2: "retains" },
+            { q: "The manager _____ over 500 workers at the textile mill.", a: "employs", w1: "slaughters", w2: "consumes" },
+            { q: "The raw materials must be safely _____ before sale.", a: "processed", w1: "cultivated", w2: "pushed" },
+            { q: "The new strategy _____ the company from total bankruptcy.", a: "prompted", w1: "gathered", w2: "located" },
+            { q: "During the economic _____, retail sales dropped by 40%.", a: "slump", w1: "trend", w2: "yield" },
+            { q: "The massive cargo ship was built in the local _____.", a: "shipyard", w1: "refinery", w2: "quarry" },
+            { q: "The scientist must _____ the data to find the hidden trends.", a: "refine", w1: "slaughter", w2: "cultivate" },
+            { q: "The country _____ its position as the top grain producer.", a: "retains", w1: "excludes", w2: "submits" }
         ];
 
-        // 4. Supply Chain Clash (Words to combine)
+        // 4. Supply Chain Clash (Only 2 target words, meaningful examples)
         const sentenceGroups = [
-            { words: ["Harvest", "Commodity", "Export"] },
-            { words: ["Automation", "Refinery", "Manufactures"] },
-            { words: ["Bankrupt", "Wages", "Slump"] },
-            { words: ["Livestock", "Poultry", "Consume"] },
-            { words: ["Irrigation", "Fertile", "Yield"] },
-            { words: ["Devaluation", "Importer", "Contracts"] },
-            { words: ["Orchard", "Cultivated", "Lush"] },
-            { words: ["Redundant", "Assembly Line", "Operates"] }
+            { words: ["Harvest", "Commodity"], example: "The annual wheat harvest is our most valuable export commodity." },
+            { words: ["Automation", "Redundant"], example: "When the factory introduced automation, hundreds of manual workers became redundant." },
+            { words: ["Devaluation", "Importer"], example: "The sudden devaluation of our currency made it incredibly expensive for the importer to buy foreign goods." },
+            { words: ["Irrigation", "Barren"], example: "Without advanced irrigation systems, this land would remain completely barren." },
+            { words: ["Poultry", "Consume"], example: "As people consume more white meat, local poultry farms have rapidly expanded." },
+            { words: ["Refinery", "Processed"], example: "The raw oil is transported to the refinery to be processed into clean fuel." },
+            { words: ["Flourishing", "Yield"], example: "Thanks to the flourishing weather conditions, the farmers reported a record crop yield." },
+            { words: ["Bankrupt", "Slump"], example: "The prolonged economic slump caused many small businesses to go bankrupt." },
+            { words: ["Exporter", "Livestock"], example: "The country is a major global exporter of cattle and other livestock." },
+            { words: ["Quarry", "Transportation"], example: "Heavy trucks are required for the transportation of stone from the local quarry." },
+            { words: ["Orchard", "Fruit"], example: "During the summer, the orchard is filled with workers picking fresh fruit." },
+            { words: ["Wages", "Assembly Line"], example: "The workers on the assembly line went on strike to demand higher wages." }
         ];
 
         // 5. Global Jeopardy Categories
@@ -480,8 +598,8 @@
                 questions: [
                     { q: "The use of largely automatic equipment in a system of manufacturing.", a: "What is Automation?" },
                     { q: "An industrial installation where a substance is purified.", a: "What is a Refinery?" },
-                    { q: "A series of workers and machines in a factory by which a succession of identical items is progressively assembled.", a: "What is an Assembly Line?" },
-                    { q: "No longer needed or useful; superfluous (often describing a worker replaced by a machine).", a: "What is Redundant?" }
+                    { q: "A series of workers and machines progressively assembling an item.", a: "What is an Assembly Line?" },
+                    { q: "No longer needed or useful (often describing a worker replaced by a machine).", a: "What is Redundant?" }
                 ]
             },
             {
@@ -503,6 +621,26 @@
                 ]
             }
         ];
+
+        // 6. Millionaire Questions (Market Mogul)
+        const mogulQuestions = [
+            { q: "What is a large group of cattle called?", options: ["Herd", "Flock", "Swarm", "Pack"], ans: 0 },
+            { q: "Which word means 'to make goods on a large scale using machinery'?", options: ["Consume", "Manufacture", "Cultivate", "Refine"], ans: 1 },
+            { q: "A sudden and severe fall in the economy is known as a...", options: ["Trend", "Yield", "Slump", "Harvest"], ans: 2 },
+            { q: "The opposite of 'fertile' land is...", options: ["Barren", "Lush", "Productive", "Cultivated"], ans: 0 },
+            { q: "What do you call a deep pit where stone is extracted?", options: ["Mill", "Refinery", "Quarry", "Shipyard"], ans: 2 },
+            { q: "Which of these refers to domestic birds like chickens and turkeys?", options: ["Cattle", "Poultry", "Livestock", "Herd"], ans: 1 },
+            { q: "If a worker is no longer needed because of machines, they are...", options: ["Invaluable", "Productive", "Flourishing", "Redundant"], ans: 3 },
+            { q: "The reduction in the official value of a currency is called...", options: ["Automation", "Devaluation", "Provision", "Nourishment"], ans: 1 },
+            { q: "What is the action of supplying water to land to help crops grow?", options: ["Fertilization", "Irrigation", "Excavation", "Preservation"], ans: 1 },
+            { q: "If an economy is 'collapsing', what is its opposite?", options: ["Flourishing", "Receding", "Swinging", "Broke"], ans: 0 },
+            { q: "A raw material that can be bought and sold is a...", options: ["Provision", "Legacy", "Commodity", "Artifact"], ans: 2 },
+            { q: "A series of workers and machines progressively assembling an item is an...", options: ["Assembly Line", "Refinery Floor", "Production Base", "Automated Mill"], ans: 0 },
+            { q: "To change physical traits or behavior to survive is to...", options: ["Produce", "Expand", "Adapt", "Gather"], ans: 2 },
+            { q: "The process of gathering mature crops from the fields is the...", options: ["Plantation", "Harvest", "Irrigation", "Devaluation"], ans: 1 },
+            { q: "A piece of land planted with fruit trees is an...", options: ["Orchard", "Conservatory", "Orangery", "Greenery"], ans: 0 }
+        ];
+
 
         // ==========================================
         // GLOBAL STATE & UTILS
@@ -536,6 +674,7 @@
             if (type === 'jeopardy') initJeopardy();
             if (type === 'restoration') initRestoration();
             if (type === 'defuse') initDefuse();
+            if (type === 'millionaire') initMillionaire();
         }
 
         function endGame(message) {
@@ -546,7 +685,7 @@
         }
 
         // ==========================================
-        // GAME 1: COMMODITY RUSH (Speed Run)
+        // GAME 1: COMMODITY RUSH
         // ==========================================
         let srTimeLeft = 60, srCurrentWord = null, srDeck = [];
         function initSpeedRun() {
@@ -665,13 +804,21 @@
         function scramblerReveal() { scTargetWord.split('').forEach(c => scGuessedLetters.add(c)); score = Math.max(0, score - 25); renderHangmanUI(); }
 
         // ==========================================
-        // GAME 3: MARKET MATCH (Memory Match)
+        // GAME 3: MARKET MATCH
         // ==========================================
         let resFlipped = [], resMatches = 0;
+        let resTimeLeft = 60, resInitial = 60, resIsRunning = false;
+
         function initRestoration() {
-            resMatches = 0; resFlipped = []; showView('restoration');
+            resMatches = 0; resFlipped = []; 
             document.getElementById('res-score').textContent = `Matches: 0 / 8`;
-            const grid = document.getElementById('res-grid'); grid.innerHTML = '';
+            resetResTimer();
+            showView('restoration');
+            
+            const grid = document.getElementById('res-grid'); 
+            grid.innerHTML = '';
+            grid.classList.add('opacity-50', 'pointer-events-none'); // Locked until start
+            
             shuffleArray([...memoryPairsData]).forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = "perspective-1000 w-full h-24 md:h-32 cursor-pointer";
@@ -687,7 +834,42 @@
                 grid.appendChild(card);
             });
         }
+
+        function updateResTimerDisplay() {
+            const d = document.getElementById('res-timer-display');
+            d.innerText = `${Math.floor(resTimeLeft/60).toString().padStart(2,'0')}:${(resTimeLeft%60).toString().padStart(2,'0')}`;
+            if(resTimeLeft <= 10 && resTimeLeft > 0) { d.classList.add('text-red-500'); d.classList.remove('text-white'); } 
+            else { d.classList.remove('text-red-500'); d.classList.add('text-white'); }
+        }
+        function adjustResTimer(amt) { 
+            if(!resIsRunning) { resInitial=Math.max(10,resInitial+amt); resTimeLeft=resInitial; updateResTimerDisplay(); } 
+        }
+        function startResTimer() { 
+            if(!resIsRunning && resTimeLeft > 0) { 
+                resIsRunning = true; 
+                document.getElementById('res-grid').classList.remove('opacity-50', 'pointer-events-none');
+                globalTimerInterval = setInterval(() => { 
+                    resTimeLeft--; updateResTimerDisplay(); 
+                    if(resTimeLeft <= 0) { 
+                        clearInterval(globalTimerInterval); resIsRunning = false; 
+                        document.getElementById('res-grid').classList.add('opacity-50', 'pointer-events-none');
+                        endGame("Time's Up! Market closed."); 
+                    }
+                }, 1000); 
+            } 
+        }
+        function pauseResTimer() { 
+            resIsRunning = false; clearInterval(globalTimerInterval); 
+            document.getElementById('res-grid').classList.add('opacity-50', 'pointer-events-none');
+        }
+        function resetResTimer() { 
+            resIsRunning = false; clearInterval(globalTimerInterval); 
+            resTimeLeft = resInitial; updateResTimerDisplay(); 
+            document.getElementById('res-grid').classList.add('opacity-50', 'pointer-events-none');
+        }
+
         function handleResClick(index) {
+            if(!resIsRunning) return;
             const inner = document.getElementById(`res-card-inner-${index}`);
             if (resFlipped.length >= 2 || inner.classList.contains('rotate-y-180') || inner.classList.contains('matched')) return;
             
@@ -702,9 +884,9 @@
                         f.el.children[1].classList.add('bg-emerald-200', 'border-emerald-500', 'text-emerald-900');
                     });
                     resFlipped = [];
-                    if (resMatches === 8) setTimeout(() => { score=100; endGame("Supply Chain Connected!"); }, 1000);
+                    if (resMatches === 8) setTimeout(() => { score=resTimeLeft*10; endGame("Supply Chain Connected!"); }, 1000);
                 } else {
-                    setTimeout(() => { resFlipped.forEach(f => f.el.classList.remove('rotate-y-180')); resFlipped = []; }, 1200);
+                    setTimeout(() => { resFlipped.forEach(f => f.el.classList.remove('rotate-y-180')); resFlipped = []; }, 1000);
                 }
             }
         }
@@ -776,21 +958,32 @@
         function initSentenceGame() { team1Score=0; team2Score=0; updateScoreboard(); resetSnTimer(); showView('sentence'); nextSentenceWords(); }
         function updateTeamScore(team, amt) { team===1 ? team1Score=Math.max(0,team1Score+amt) : team2Score=Math.max(0,team2Score+amt); updateScoreboard(); }
         function updateScoreboard() { document.getElementById('team1-score').innerText = team1Score; document.getElementById('team2-score').innerText = team2Score; }
+        
         function nextSentenceWords() {
             const group = sentenceGroups[Math.floor(Math.random()*sentenceGroups.length)];
             const container = document.getElementById('sn-words-container'); container.innerHTML = '';
             
+            document.getElementById('sn-example-box').classList.add('hidden'); // Hide example box on new draw
+            
             group.words.forEach((word, i) => {
                 container.innerHTML += `
-                    <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 border border-emerald-400 text-white px-6 py-4 rounded-xl shadow-xl transform transition hover:scale-105 cursor-default text-center min-w-[180px]">
-                        <span class="text-2xl font-black tracking-widest uppercase font-display">${word}</span>
+                    <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 border border-emerald-400 text-white px-8 py-5 rounded-xl shadow-xl transform transition hover:scale-105 cursor-default text-center min-w-[200px]">
+                        <span class="text-3xl font-black tracking-widest uppercase font-display">${word}</span>
                     </div>
                 `;
                 if(i < group.words.length - 1) {
-                    container.innerHTML += `<div class="text-3xl text-slate-500 font-black">+</div>`;
+                    container.innerHTML += `<div class="text-4xl text-slate-500 font-black">+</div>`;
                 }
             });
+            // Store example secretly for teacher reveal
+            document.getElementById('sn-example-text').textContent = `"${group.example}"`;
         }
+
+        function toggleSentenceExample() {
+            const box = document.getElementById('sn-example-box');
+            box.classList.toggle('hidden');
+        }
+
         function updateSnTimerDisplay() {
             const d = document.getElementById('sn-timer-display');
             d.innerText = `${Math.floor(snTimeLeft/60).toString().padStart(2,'0')}:${(snTimeLeft%60).toString().padStart(2,'0')}`;
@@ -805,6 +998,8 @@
         // GAME 6: GLOBAL JEOPARDY
         // ==========================================
         let jeopScoreA = 0, jeopScoreB = 0, currentJeopValue = 0, currentJeopCell = null;
+        let jeopTimeLeft = 30, jeopInitial = 30, jeopIsRunning = false, jeopTimerInterval;
+
         function initJeopardy() {
             jeopScoreA = 0; jeopScoreB = 0; document.getElementById('jeop-score-a').textContent = 0; document.getElementById('jeop-score-b').textContent = 0;
             const board = document.getElementById('jeopardy-board'); board.innerHTML = '';
@@ -824,17 +1019,55 @@
             }
             showView('jeopardy');
         }
+
+        // Timer Logic for Jeopardy Modal
+        function updateJeopTimerDisplay() {
+            const d = document.getElementById('jeop-timer-display');
+            d.innerText = jeopTimeLeft;
+            if(jeopTimeLeft <= 10 && jeopTimeLeft > 0) d.classList.add('text-red-500', 'animate-pulse');
+            else d.classList.remove('text-red-500', 'animate-pulse');
+        }
+        function adjustJeopTimer(amt) {
+            if(!jeopIsRunning) { jeopInitial=Math.max(5,jeopInitial+amt); jeopTimeLeft=jeopInitial; updateJeopTimerDisplay(); }
+        }
+        function startJeopTimer() {
+            if(!jeopIsRunning && jeopTimeLeft > 0) {
+                jeopIsRunning = true;
+                jeopTimerInterval = setInterval(() => {
+                    jeopTimeLeft--; updateJeopTimerDisplay();
+                    if(jeopTimeLeft <= 0) {
+                        clearInterval(jeopTimerInterval); jeopIsRunning = false;
+                        document.getElementById('jeop-timer-display').innerText = "00";
+                    }
+                }, 1000);
+            }
+        }
+        function pauseJeopTimer() { jeopIsRunning = false; clearInterval(jeopTimerInterval); }
+        function resetJeopTimer() { jeopIsRunning = false; clearInterval(jeopTimerInterval); jeopTimeLeft = jeopInitial; updateJeopTimerDisplay(); }
+
         function openJeopardyQ(catName, qObj, val, cellElement) {
             if(cellElement.classList.contains('opacity-0')) return;
             currentJeopValue = val; currentJeopCell = cellElement;
             document.getElementById('jeop-cat-val').textContent = `${catName} for ${val}`;
             document.getElementById('jeop-q-text').textContent = qObj.q;
             document.getElementById('jeop-a-text').textContent = qObj.a;
+            
+            // Reset modal UI and Timer
             document.getElementById('jeop-answer-area').classList.add('hidden');
             document.getElementById('jeop-reveal-btn').classList.remove('hidden');
             document.getElementById('jeop-modal').classList.remove('hidden');
+            resetJeopTimer();
         }
+
+        function cancelJeopardy() {
+            clearInterval(jeopTimerInterval); jeopIsRunning = false;
+            currentJeopCell.classList.remove('opacity-0', 'cursor-default'); 
+            currentJeopCell.classList.add('hover:bg-slate-600', 'active:translate-y-1');
+            document.getElementById('jeop-modal').classList.add('hidden');
+        }
+
         function awardJeopardy(team) {
+            clearInterval(jeopTimerInterval); jeopIsRunning = false;
             if(team===1) { jeopScoreA += currentJeopValue; document.getElementById('jeop-score-a').textContent = jeopScoreA; }
             if(team===2) { jeopScoreB += currentJeopValue; document.getElementById('jeop-score-b').textContent = jeopScoreB; }
             currentJeopCell.classList.add('opacity-0', 'cursor-default'); currentJeopCell.classList.remove('hover:bg-slate-600', 'active:translate-y-1');
@@ -844,6 +1077,113 @@
             let finished = true;
             for(let i=4; i<allCells.length; i++) { if(!allCells[i].classList.contains('opacity-0')) finished = false; }
             if(finished) { score = Math.max(jeopScoreA, jeopScoreB); setTimeout(()=>endGame(`Market Closed! Team A: ${jeopScoreA} | Team B: ${jeopScoreB}`), 1000); }
+        }
+
+        // ==========================================
+        // GAME 7: THE MARKET MOGUL (Millionaire)
+        // ==========================================
+        let milDeck = [], milLevel = 0;
+        const prizeLadder = [100, 500, 1000, 5000, 10000, 50000, 100000, 250000, 500000, 1000000];
+        let currentMilQ = null;
+
+        function initMillionaire() {
+            milLevel = 0;
+            // Get 10 random questions from the pool
+            milDeck = shuffleArray([...mogulQuestions]).slice(0, 10);
+            
+            // Reset lifelines
+            const btn5050 = document.getElementById('btn-5050');
+            btn5050.disabled = false;
+            btn5050.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-700', 'border-slate-500');
+            btn5050.classList.add('bg-amber-600', 'hover:bg-amber-500', 'border-amber-300');
+
+            showView('millionaire');
+            loadMilQuestion();
+        }
+
+        function updateLadderUI() {
+            const steps = document.querySelectorAll('.ladder-step');
+            steps.forEach(step => {
+                const stepLevel = parseInt(step.getAttribute('data-level'));
+                step.classList.remove('active', 'passed');
+                if (stepLevel === milLevel) {
+                    step.classList.add('active');
+                } else if (stepLevel < milLevel) {
+                    step.classList.add('passed');
+                }
+            });
+        }
+
+        function loadMilQuestion() {
+            if (milLevel >= 10) {
+                score = 1000000;
+                endGame("You are a Market Mogul! You won $1,000,000!");
+                return;
+            }
+            updateLadderUI();
+            currentMilQ = milDeck[milLevel];
+            
+            const qText = document.getElementById('mil-q-text');
+            qText.parentElement.classList.remove('animate-pop-in'); void qText.parentElement.offsetWidth; qText.parentElement.classList.add('animate-pop-in');
+            qText.textContent = currentMilQ.q;
+
+            const container = document.getElementById('mil-options');
+            container.innerHTML = '';
+            
+            const letters = ['A', 'B', 'C', 'D'];
+            currentMilQ.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "mil-opt-btn bg-slate-800 hover:bg-slate-700 border-2 border-emerald-600/50 text-white font-bold py-4 px-6 rounded-xl transition text-left flex gap-4 text-lg shadow-[0_4px_0_#064e3b] active:translate-y-1 active:shadow-none";
+                btn.innerHTML = `<span class="text-emerald-400 w-6">${letters[idx]}:</span> <span class="flex-grow">${opt}</span>`;
+                btn.onclick = () => checkMilAnswer(idx, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function use5050() {
+            const btn5050 = document.getElementById('btn-5050');
+            if (btn5050.disabled) return;
+            
+            btn5050.disabled = true;
+            btn5050.classList.remove('bg-amber-600', 'hover:bg-amber-500', 'border-amber-300');
+            btn5050.classList.add('bg-slate-700', 'border-slate-500', 'opacity-50', 'cursor-not-allowed');
+
+            const container = document.getElementById('mil-options');
+            let wrongIndices = [0, 1, 2, 3].filter(i => i !== currentMilQ.ans);
+            wrongIndices = shuffleArray(wrongIndices).slice(0, 2); // pick 2 wrong ones
+
+            Array.from(container.children).forEach((btn, idx) => {
+                if (wrongIndices.includes(idx)) {
+                    btn.style.visibility = 'hidden'; // Hide the button completely to represent removal
+                }
+            });
+        }
+
+        function checkMilAnswer(selectedIndex, btnElement) {
+            const container = document.getElementById('mil-options');
+            Array.from(container.children).forEach(b => b.disabled = true); // Lock inputs
+
+            btnElement.classList.replace('bg-slate-800', 'bg-yellow-600');
+            btnElement.classList.replace('hover:bg-slate-700', 'bg-yellow-600');
+
+            setTimeout(() => {
+                if (selectedIndex === currentMilQ.ans) {
+                    btnElement.classList.replace('bg-yellow-600', 'bg-emerald-600');
+                    setTimeout(() => {
+                        milLevel++;
+                        loadMilQuestion();
+                    }, 1500);
+                } else {
+                    btnElement.classList.replace('bg-yellow-600', 'bg-red-600');
+                    btnElement.classList.add('animate-shake');
+                    // Highlight correct answer
+                    Array.from(container.children)[currentMilQ.ans].classList.replace('bg-slate-800', 'bg-emerald-600');
+                    
+                    const winnings = milLevel > 0 ? prizeLadder[milLevel - 1] : 0;
+                    score = winnings;
+                    setTimeout(() => endGame(`Bankrupt! You walk away with $${winnings.toLocaleString()}.`), 2500);
+                }
+            }, 1500); // Suspense delay
         }
 
     </script>
