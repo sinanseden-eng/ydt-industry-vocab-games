@@ -188,14 +188,24 @@
                     <button class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-3 rounded text-lg transition-all tracking-wider font-display">Start Shift</button>
                 </div>
 
-                <!-- Game 7 (NEW) -->
-                <div class="glass green-border rounded-xl p-8 text-center flex flex-col justify-between game-btn cursor-pointer lg:col-span-2" onclick="startGame('millionaire')">
+                <!-- Game 7 -->
+                <div class="glass green-border rounded-xl p-8 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('millionaire')">
                     <div>
                         <div class="text-5xl mb-4 drop-shadow-md">💰</div>
                         <h2 class="text-2xl text-emerald-400 mb-2 font-display">The Market Mogul</h2>
                         <p class="text-slate-300 text-sm mb-6">Climb the ladder to $1,000,000 by answering multiple-choice vocabulary questions!</p>
                     </div>
                     <button class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-3 rounded text-lg transition-all tracking-wider font-display">Play for a Million</button>
+                </div>
+
+                <!-- Game 8 (NEW: Baamboozle Style) -->
+                <div class="glass green-border rounded-xl p-8 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('baamboozle')">
+                    <div>
+                        <div class="text-5xl mb-4 drop-shadow-md">🎲</div>
+                        <h2 class="text-2xl text-emerald-400 mb-2 font-display">Market Crash & Cash</h2>
+                        <p class="text-slate-300 text-sm mb-6">Pick tiles to answer questions, steal points, or trigger chaotic market crashes!</p>
+                    </div>
+                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold py-3 rounded text-lg transition-all tracking-wider font-display">Start Trading</button>
                 </div>
             </div>
         </div>
@@ -478,6 +488,68 @@
             </div>
         </div>
 
+        <!-- ================= VIEW 8: MARKET CRASH & CASH (Baamboozle) ================= -->
+        <div id="view-baamboozle" class="view">
+            <div class="glass green-border rounded-3xl p-6 md:p-8 relative max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="showView('dashboard')" class="text-emerald-500 hover:text-emerald-300 font-bold tracking-widest text-sm uppercase">← Back</button>
+                    <div class="text-3xl font-display text-emerald-400">Market Crash & Cash</div>
+                    <div class="flex gap-6">
+                        <div class="text-xl font-bold text-blue-400 font-display">Team A: <span id="bbz-score-a" class="text-white">0</span></div>
+                        <div class="text-xl font-bold text-rose-400 font-display">Team B: <span id="bbz-score-b" class="text-white">0</span></div>
+                    </div>
+                </div>
+
+                <!-- Grid of 24 boxes -->
+                <div class="bg-slate-900 p-4 rounded-xl border-2 border-slate-700 shadow-2xl">
+                    <div id="bbz-board" class="grid grid-cols-4 md:grid-cols-6 gap-3">
+                        <!-- Tiles injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Modals for Questions and Powers -->
+                <div id="bbz-modal" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div class="bg-slate-900 p-8 md:p-10 rounded-2xl border-2 border-emerald-600 max-w-4xl w-full text-center relative shadow-2xl">
+                        
+                        <!-- Question UI -->
+                        <div id="bbz-q-area" class="hidden">
+                            <p id="bbz-q-text" class="text-white text-3xl md:text-4xl font-light mb-10 leading-relaxed"></p>
+                            
+                            <div id="bbz-answer-area" class="hidden">
+                                <p class="text-amber-400 text-sm font-bold uppercase tracking-widest mb-2">Answer:</p>
+                                <p id="bbz-a-text" class="text-white text-2xl mb-10 font-medium"></p>
+                                
+                                <p class="text-slate-400 text-xs font-bold uppercase mb-4 tracking-widest">Did they get it right?</p>
+                                <div class="flex justify-center gap-4">
+                                    <button onclick="resolveBbz(1)" class="bg-blue-800 hover:bg-blue-700 border border-blue-500 text-white font-bold py-3 px-8 rounded transition text-lg">+25 Team A</button>
+                                    <button onclick="resolveBbz(2)" class="bg-rose-800 hover:bg-rose-700 border border-rose-500 text-white font-bold py-3 px-8 rounded transition text-lg">+25 Team B</button>
+                                    <button onclick="resolveBbz(0)" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-3 px-8 rounded transition text-lg">Incorrect (Nobody)</button>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-center gap-4 mt-8">
+                                <button id="bbz-reveal-btn" onclick="document.getElementById('bbz-answer-area').classList.remove('hidden'); this.classList.add('hidden');" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-10 rounded transition text-lg shadow-lg font-display tracking-widest flex-1 max-w-xs">Reveal Answer</button>
+                                <button onclick="cancelBbz()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded transition text-sm uppercase tracking-widest border border-slate-500">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Power Up UI -->
+                        <div id="bbz-p-area" class="hidden">
+                            <h3 id="bbz-p-title" class="text-5xl font-display text-amber-400 mb-6 uppercase tracking-widest animate-pulse"></h3>
+                            <p id="bbz-p-desc" class="text-white text-2xl mb-12 font-medium"></p>
+                            
+                            <p class="text-slate-400 text-xs font-bold uppercase mb-4 tracking-widest">Which team picked this tile?</p>
+                            <div class="flex justify-center gap-4">
+                                <button onclick="resolveBbz(1)" class="bg-blue-800 hover:bg-blue-700 border border-blue-500 text-white font-bold py-3 px-8 rounded transition text-lg shadow-[0_0_15px_rgba(30,64,175,0.6)]">Apply to Team A</button>
+                                <button onclick="resolveBbz(2)" class="bg-rose-800 hover:bg-rose-700 border border-rose-500 text-white font-bold py-3 px-8 rounded transition text-lg shadow-[0_0_15px_rgba(159,18,57,0.6)]">Apply to Team B</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ================= RESULTS VIEW ================= -->
         <div id="view-results" class="view text-center">
             <div class="glass green-border rounded-3xl p-10 max-w-lg mx-auto animate-pop-in">
@@ -641,6 +713,35 @@
             { q: "A piece of land planted with fruit trees is an...", options: ["Orchard", "Conservatory", "Orangery", "Greenery"], ans: 0 }
         ];
 
+        // 7. Market Crash & Cash (Baamboozle)
+        const baamData = [
+            { type: 'q', q: "The supply of water to land or crops to help growth.", a: "Irrigation" },
+            { type: 'q', q: "Farm animals regarded as an asset.", a: "Livestock" },
+            { type: 'q', q: "A deep pit from which stone is extracted.", a: "Quarry" },
+            { type: 'q', q: "A sudden, severe fall in the economy.", a: "Slump" },
+            { type: 'q', q: "No longer needed or useful (often replaced by machines).", a: "Redundant" },
+            { type: 'q', q: "To make goods on a large scale using machinery.", a: "Manufacture" },
+            { type: 'q', q: "A piece of land planted with fruit trees.", a: "Orchard" },
+            { type: 'q', q: "A raw material that can be bought and sold.", a: "Commodity" },
+            { type: 'q', q: "The reduction in the official value of a currency.", a: "Devaluation" },
+            { type: 'q', q: "Declared in law unable to pay outstanding debts.", a: "Bankrupt" },
+            { type: 'q', q: "An industrial installation where a substance is purified.", a: "Refinery" },
+            { type: 'q', q: "Domestic fowl like chickens and turkeys.", a: "Poultry" },
+            { type: 'q', q: "Land too poor to produce any vegetation.", a: "Barren" },
+            { type: 'q', q: "Growing luxuriantly (the opposite of barren).", a: "Lush" },
+            { type: 'q', q: "A country or company that sends goods abroad.", a: "Exporter" },
+            { type: 'q', q: "Developing rapidly and successfully; thriving.", a: "Flourishing" },
+            { type: 'q', q: "To change physical traits or behavior to survive.", a: "Adapt" },
+            { type: 'q', q: "The process of gathering mature crops.", a: "Harvest" },
+
+            // Power-ups
+            { type: 'p', action: 'gain', amount: 50, title: '📈 Market Boom!', desc: 'Your stocks soared. Gain 50 points!' },
+            { type: 'p', action: 'lose', amount: 25, title: '📉 Market Crash!', desc: 'Economic downturn. Lose 25 points.' },
+            { type: 'p', action: 'steal', amount: 50, title: '🕵️ Corporate Espionage!', desc: 'Steal up to 50 points from the other team.' },
+            { type: 'p', action: 'swap', amount: 0, title: '🔄 Hostile Takeover!', desc: 'Swap scores with the other team.' },
+            { type: 'p', action: 'bankrupt', amount: 0, title: '💸 Total Bankruptcy!', desc: 'Oh no! You lose ALL your points. Score drops to 0.' },
+            { type: 'p', action: 'gain', amount: 100, title: '💰 Government Bailout!', desc: 'You received a massive subsidy. Gain 100 points!' }
+        ];
 
         // ==========================================
         // GLOBAL STATE & UTILS
@@ -675,6 +776,7 @@
             if (type === 'restoration') initRestoration();
             if (type === 'defuse') initDefuse();
             if (type === 'millionaire') initMillionaire();
+            if (type === 'baamboozle') initBaamboozle();
         }
 
         function endGame(message) {
@@ -1184,6 +1286,114 @@
                     setTimeout(() => endGame(`Bankrupt! You walk away with $${winnings.toLocaleString()}.`), 2500);
                 }
             }, 1500); // Suspense delay
+        }
+
+        // ==========================================
+        // GAME 8: MARKET CRASH & CASH (Baamboozle)
+        // ==========================================
+        let bbzScoreA = 0, bbzScoreB = 0, currentBbzCell = null, currentBbzData = null;
+
+        function initBaamboozle() {
+            bbzScoreA = 0; bbzScoreB = 0;
+            updateBbzScores();
+            
+            const board = document.getElementById('bbz-board');
+            board.innerHTML = '';
+            
+            let shuffledDeck = shuffleArray([...baamData]);
+
+            shuffledDeck.forEach((item, index) => {
+                const cell = document.createElement('div');
+                cell.className = "bg-emerald-700 hover:bg-emerald-600 text-white font-display text-5xl text-center py-6 cursor-pointer border-b-4 border-emerald-900 transition active:translate-y-1 active:border-b-0 rounded-xl shadow-lg";
+                cell.textContent = index + 1;
+                cell.onclick = () => openBbzTile(item, cell);
+                board.appendChild(cell);
+            });
+            showView('baamboozle');
+        }
+
+        function openBbzTile(item, cellElement) {
+            if(cellElement.classList.contains('opacity-0')) return;
+            currentBbzCell = cellElement;
+            currentBbzData = item;
+
+            document.getElementById('bbz-modal').classList.remove('hidden');
+
+            if (item.type === 'q') {
+                document.getElementById('bbz-q-area').classList.remove('hidden');
+                document.getElementById('bbz-p-area').classList.add('hidden');
+                document.getElementById('bbz-q-text').textContent = item.q;
+                document.getElementById('bbz-a-text').textContent = item.a;
+                document.getElementById('bbz-answer-area').classList.add('hidden');
+                document.getElementById('bbz-reveal-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('bbz-q-area').classList.add('hidden');
+                document.getElementById('bbz-p-area').classList.remove('hidden');
+                document.getElementById('bbz-p-title').textContent = item.title;
+                document.getElementById('bbz-p-desc').textContent = item.desc;
+            }
+        }
+
+        function resolveBbz(team) { // 1 for A, 2 for B, 0 for nobody
+            if (currentBbzData.type === 'q') {
+                if (team === 1) bbzScoreA += 25;
+                if (team === 2) bbzScoreB += 25;
+            } else {
+                // Power Up Logic
+                if (team !== 0) {
+                    if (currentBbzData.action === 'gain') {
+                        if (team === 1) bbzScoreA += currentBbzData.amount;
+                        if (team === 2) bbzScoreB += currentBbzData.amount;
+                    } else if (currentBbzData.action === 'lose') {
+                        if (team === 1) bbzScoreA = Math.max(0, bbzScoreA - currentBbzData.amount);
+                        if (team === 2) bbzScoreB = Math.max(0, bbzScoreB - currentBbzData.amount);
+                    } else if (currentBbzData.action === 'steal') {
+                        if (team === 1) {
+                            let stolen = Math.min(currentBbzData.amount, bbzScoreB);
+                            bbzScoreB -= stolen; bbzScoreA += stolen;
+                        } else if (team === 2) {
+                            let stolen = Math.min(currentBbzData.amount, bbzScoreA);
+                            bbzScoreA -= stolen; bbzScoreB += stolen;
+                        }
+                    } else if (currentBbzData.action === 'swap') {
+                        let temp = bbzScoreA; bbzScoreA = bbzScoreB; bbzScoreB = temp;
+                    } else if (currentBbzData.action === 'bankrupt') {
+                        if (team === 1) bbzScoreA = 0;
+                        if (team === 2) bbzScoreB = 0;
+                    }
+                }
+            }
+
+            updateBbzScores();
+            closeBbzModal();
+        }
+
+        function closeBbzModal() {
+            currentBbzCell.classList.add('opacity-0', 'cursor-default');
+            currentBbzCell.classList.remove('hover:bg-emerald-600', 'active:translate-y-1');
+            document.getElementById('bbz-modal').classList.add('hidden');
+            checkBbzEnd();
+        }
+
+        function cancelBbz() {
+            document.getElementById('bbz-modal').classList.add('hidden');
+        }
+
+        function updateBbzScores() {
+            document.getElementById('bbz-score-a').textContent = bbzScoreA;
+            document.getElementById('bbz-score-b').textContent = bbzScoreB;
+        }
+
+        function checkBbzEnd() {
+            const allCells = document.getElementById('bbz-board').children;
+            let finished = true;
+            for(let i=0; i<allCells.length; i++) {
+                if(!allCells[i].classList.contains('opacity-0')) finished = false;
+            }
+            if(finished) {
+                score = Math.max(bbzScoreA, bbzScoreB);
+                setTimeout(()=>endGame(`Market Closed! Team A: ${bbzScoreA} | Team B: ${bbzScoreB}`), 1000);
+            }
         }
 
     </script>
